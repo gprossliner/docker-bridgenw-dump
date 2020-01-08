@@ -1,0 +1,31 @@
+version: "3"
+services:
+  server:
+    image: nginx
+    ports:
+      - "8000:80"
+    networks:
+      - testnet
+  client1:
+    build: ./client
+    image: client
+    networks:
+      - testnet
+  client2:
+    build: ./client
+    image: client
+    networks:
+      - testnet
+
+  docker-bridgenw-dump:
+    # build: ./docker-bridgenw-dump
+    image: gprossliner/docker-bridgenw-dump
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/files:/bridgenw-dumps
+    networks:
+      # docker-bridgenw-dump uses the attached network to enumerate containers
+      # connected to this network
+      - testnet
+networks:
+  testnet:

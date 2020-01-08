@@ -1,0 +1,5 @@
+FROM alpine
+RUN apk add curl
+COPY entry.sh .
+RUN chmod +x entry.sh
+ENTRYPOINT ./entry.sh
