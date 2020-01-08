@@ -16,7 +16,7 @@ manager() {
     echo Using Network: $NETWORK
 
     echo Inspecting network "$NETWORK" to get the bridge network interface
-    NETIF=br-$(docker inspect $HOSTNAME | jq -r ".[0].NetworkSettings.Networks.$NETWORK.NetworkID | .[0:12]")
+    NETIF=br-$(docker inspect $HOSTNAME | jq -r ".[0].NetworkSettings.Networks.\"$NETWORK\".NetworkID | .[0:12]")
     echo Using Interface: $NETIF
 
     # trap to stop gracefully
