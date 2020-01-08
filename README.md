@@ -2,11 +2,26 @@
 
 A utility to capture all Traffic on a Docker Bridge Network to rotating .pcap files.
 
-Please note that docker-bridgenw-dump will not work with overlay networks,
-only with bridge networks.
+**When to use docker-bridgenw-dump**
 
 It's primary usecase is to provide network dumps for development or testing.
 It's not designed and tested to be a production tool.
+
+Please note that docker-bridgenw-dump will not work with overlay networks,
+only with bridge networks.
+
+**Why use docker-bridgenw-dump instead of manually starting tcpdump on the host?**
+
+As a docker bridge network creates a netif on the host, it is easy to run tcpdump
+with the correct network interface. By using docker-bridgenw-dump, you gain the
+follwing advantages:
+- Works with Docker for Windows: When using Docker for Windows, you have no 
+access to the virtual machine running the Docker Engine.
+- Automatically attach to the correct network: You don't have to lookup for the 
+correct netif. This is specially usefull in a docker-compose based application,
+where each service is attached to a network by default.
+
+**Links**
 
 [docker-bridgenw-dump on github](https://github.com/gprossliner/docker-bridgenw-dump)
 
@@ -116,6 +131,21 @@ Currently there are neither Unit nor Integration Tests. The docker-bridgenw-dump
 tool has been tested manually on Ubuntu 18.04.3 LTS, and Docker version 18.09.7, build 2d0083d.
 
 Tested on Windows Version	10.0.18363 Build 18363, and Docker for Windows version 19.03.5, build 633a0ea.
+
+## Release Notes
+
+The dockerhub images are automatically build an pushed by dockerhub automated build, 
+using the following rules:
+- If anything is pushed to 'master', an image is build for the 'latest' tag
+- If a release is created, using the vX.Y pattern, a image with the corresponding 
+tag is build and pushed.
+
+As the name of the image is included in the image itself as an environment variable,
+the digests of the 'lastest' and the latest 'vX.Y...' tag will be different, 
+allthough they are build from the same commit.
+
+If you use the 'latest' tag, the worker container will also use 'latest'.
+If you use a version tag, the container will always use the same version.
 
 ## Return Codes
 
