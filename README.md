@@ -1,4 +1,4 @@
-# Docker BrigdeNW Dump
+# docker-bridgenw-dump
 
 A utility to capture all Traffic on a Docker Bridge Network to rotating .pcap files.
 
@@ -7,6 +7,15 @@ only with bridge networks.
 
 It's primary usecase is to provide network dumps for development or testing.
 It's not designed and tested to be a production tool.
+
+[docker-bridgenw-dump on github](https://github.com/gprossliner/docker-bridgenw-dump)
+
+[docker-bridgenw-dump on dockerhub](https://hub.docker.com/r/gprossliner/docker-bridgenw-dump)
+
+## Contributing
+
+Contribution in form of Issues, Comments and Pull-Requests are welcome.
+Please feel free to create an Issue if you have questions.
 
 ## Usage
 
