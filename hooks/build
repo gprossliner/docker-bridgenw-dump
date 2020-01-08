@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
+###########
+## This is a hook for the dockerhub build, which sets the IMAGENAME build arg.
+## see https://github.com/gprossliner/docker-bridgenw-dump/issues/1
+## see https://docs.docker.com/docker-hub/builds/advanced/
+
 echo "------ HOOK START - BUILD -------"
-printenv
-
 docker build --build-arg IMAGENAME=$IMAGE_NAME -t $IMAGE_NAME .
-
 echo "------ HOOK END - BUILD -------"
