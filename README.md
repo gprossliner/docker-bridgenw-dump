@@ -112,8 +112,10 @@ but this has not been tested yet.
 
 ## Tests
 
-Currently there are neigher Unit nor Integration Tests. The docker-bridgenw-dump
+Currently there are neither Unit nor Integration Tests. The docker-bridgenw-dump
 tool has been tested manually on Ubuntu 18.04.3 LTS, and Docker version 18.09.7, build 2d0083d.
+
+Tested on Windows Version	10.0.18363 Build 18363, and Docker for Windows version 19.03.5, build 633a0ea.
 
 ## Return Codes
 
