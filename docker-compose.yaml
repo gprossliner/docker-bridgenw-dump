@@ -7,13 +7,11 @@ services:
     networks:
       - testnet
   client1:
-    build: ./client
-    image: client
+    image: docker-bridgenw-dump-testclient
     networks:
       - testnet
-  client2:
-    build: ./client
-    image: client
+  client2:  
+    image: docker-bridgenw-dump-testclient
     networks:
       - testnet
 

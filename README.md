@@ -1,7 +1,6 @@
 # Docker BrigdeNW Dump
 
-This is a small utility to capture all Traffic on a Docker Bridge Network
-to rotating .pcap files.
+A utility to capture all Traffic on a Docker Bridge Network to rotating .pcap files.
 
 Please note that docker-bridgenw-dump will not work with overlay networks,
 only with bridge networks.
@@ -25,7 +24,7 @@ docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/dumpfiles:/bridgenw-dumps \
     --net dockeroverlaydump_testnet \
-    docker-bridgenw-dump
+    gprossliner/docker-bridgenw-dump
 ```
 
 ## Start with docker-compose

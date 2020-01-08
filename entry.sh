@@ -23,7 +23,7 @@ manager() {
     trap stop INT       # CTRL+C
     trap stop TERM      # docker stop
 
-    WORKERCMD="docker run -d -it --rm --net host -v $VOLSOURCE:/bridgenw-dumps $IMAGE_NAME $NETIF"
+    WORKERCMD="docker run -d -it --rm --net host -v $VOLSOURCE:/bridgenw-dumps $IMAGENAME $NETIF"
     # echo $WORKERCMD
     WORKERID=$($WORKERCMD)
     echo "Started Worker Container: '$WORKERID'"
@@ -63,7 +63,7 @@ stop () {
 worker() {
 
     echo "Removing existing dumps"
-    rm -f /bridgenw-dumps
+    rm -f /bridgenw-dumps/*
 
     NETIF=$1
     ROTATE_SEC=600
