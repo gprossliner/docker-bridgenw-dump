@@ -2,8 +2,8 @@ FROM alpine
 
 
 ARG DOCKER_CLI_VERSION="17.06.2-ce"
-ARG IMAGE_NAME
-ENV IMAGE_NAME=$IMAGE_NAME
+ARG IMAGENAME=gprossliner/docker-bridgenw-dump
+ENV IMAGENAME=$IMAGENAME
 
 # install docker client
 ENV DOWNLOAD_URL="https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_CLI_VERSION.tgz"
