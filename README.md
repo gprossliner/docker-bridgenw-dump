@@ -15,6 +15,7 @@ only with bridge networks.
 As a docker bridge network creates a network interface on the host, it is easy 
 to run tcpdump with the correct network interface. By using docker-bridgenw-dump, 
 you gain the follwing advantages:
+
 - Works with Docker for Windows: When using Docker for Windows, you have no 
 access to the virtual machine running the Docker engine.
 - Automatically attach to the correct network: You don't have to lookup the correct 
@@ -35,15 +36,19 @@ Please feel free to create an Issue if you have any questions.
 ## Usage
 
 Requirements for a container running the `docker-bridgenw-dump` image:
+
 - mount the Docker socket, because we need to get information from Docker
 - mount a volume to the `/bridgenw-dumps` container path
 - attach the container to the network you want to dump
+- pass additional config parameters as environment variables, possible values are:
+  - `ROTATE_SEC`: New `.pcap` file creation time in seconds, default is `600`
+  - `FILTER`: Filter parameters when calling `tcpdump`. The flags: `-i`, `-G` and `-w` cannot be defined here, as they are already used, default is `-nU`
 
 ## Start manually
 
 You can start it by `docker run`, like:
 
-```
+```bash
 docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/dumpfiles:/bridgenw-dumps \
@@ -66,6 +71,9 @@ services:
       # /tmp/capfiles is the host directory where the .pcap files are written to
       - /tmp/capfiles:/bridgenw-dumps
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - ROTATE_SEC=400
+      - FILTER=-nnSX port 80
     networks:
       # docker-bridgenw-dump dumps traffik connected to this network
       # this may also be the default network
@@ -104,21 +112,23 @@ to the host network. It uses the same image, but starts in 'Worker' mode.
 The worker uses the information provided by the manager, to execute `tcpdump` with
 the following arguments:
 
-```
+```bash
 NETIF=<br-SHORTNWID>
 ROTATE_SEC=600 # rotate every 10 minutes
-tcpdump -n -i $NETIF -U -G $ROTATE_SEC -w /bridgenw-dumps/trace-%H-%M.pcap
+FILTER=-nU
+tcpdump $FILTER -i $NETIF -G $ROTATE_SEC -w /bridgenw-dumps/trace-%H-%M.pcap
 ```
 
 It uses the trace-%H-%M.pcap filename, where %H and %M are expanded by strftime(3).
 So the target files will be named trace- and the current Hour (24h) and Minute, like:
 'trace-17-00.pcap', 'trace-17-10.pcap', ...
 
-**NOTE:** To avoid that (interleaving) files are left from a previous run, existing 
+**NOTE:** To avoid that (interleaving) files are left from a previous run, existing
 files are deleted from the output directory! If you wanna keep old traces,
 copy them elsewhere.
 
 To avoid leftover containers, the Manager:
+
 - handles SIGINT and SIGTERM to stop a running Worker
 - monitors the status of the Worker to stop itself, if the Worker has stopped unexpectedly
 
@@ -136,19 +146,20 @@ tool has been tested manually on:
 * Ubuntu 18.04.3 LTS, and Docker version 18.09.7, build 2d0083d.
 * Windows Version 10.0.18363 Build 18363, and Docker for Windows version 19.03.5, build 633a0ea.
 
-If you test the tool on in a different environment, please let me know, so I may 
+If you test the tool on in a different environment, please let me know, so I may
 add this to the list.
 
 ## Release Notes
 
-The dockerhub images are automatically build an pushed by dockerhub automated build, 
+The dockerhub images are automatically build an pushed by dockerhub automated build,
 using the following rules:
+
 - If anything is pushed to 'master', an image is build for the 'latest' tag
-- If a release is created, it creates a tag using the vX.Y pattern, and an image 
+- If a release is created, it creates a tag using the vX.Y pattern, and an image
 with the corresponding tag is build and pushed.
 
 As the name of the image is included in the image itself as an environment variable,
-the digests of the 'lastest' and the latest 'vX.Y...' tag will be different, 
+the digests of the 'lastest' and the latest 'vX.Y...' tag will be different,
 allthough they are build from the same commit.
 
 If you use the 'latest' tag, the worker container will also use 'latest'.

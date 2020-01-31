@@ -2,6 +2,17 @@
 set -eu
 
 manager() {
+    if [ -z ${ROTATE_SEC+600} ]; then
+        echo "ROTATE_SEC not set using default 600"
+    else
+        echo "ROTATE_SEC is set to" $ROTATE_SEC
+    fi
+
+    if [ -z ${FILTER+-nU} ]; then
+        echo "FILTER not set using default '-nU'"
+    else
+        echo "FILTER is set to" $FILTER
+    fi
 
     echo "Inspecting binding '/bridgenw-dumps' to get source path"
     VOLSOURCE=$(docker inspect $HOSTNAME | jq -r ".[0].Mounts[]|select(.Destination==\"/bridgenw-dumps\")|.Source")
@@ -23,9 +34,9 @@ manager() {
     trap stop INT       # CTRL+C
     trap stop TERM      # docker stop
 
-    WORKERCMD="docker run -d -it --rm --net host -v $VOLSOURCE:/bridgenw-dumps $IMAGENAME $NETIF"
-    # echo $WORKERCMD
-    WORKERID=$($WORKERCMD)
+    WORKERCMD="docker run -d -it --rm --net host -v $VOLSOURCE:/bridgenw-dumps $IMAGENAME $NETIF $ROTATE_SEC '${FILTER}'"
+    echo $WORKERCMD
+    WORKERID=$(eval $WORKERCMD)
     echo "Started Worker Container: '$WORKERID'"
 
     # stop worker startup logs for information
@@ -61,20 +72,20 @@ stop () {
 
 
 worker() {
-
     echo "Removing existing dumps"
     rm -f /bridgenw-dumps/*
 
-    NETIF=$1
-    ROTATE_SEC=600
-
     echo "Running as worker for interface $NETIF"
     echo "Write a new file every $ROTATE_SEC seconds"
-    tcpdump -n -i $NETIF -U -G $ROTATE_SEC -w /bridgenw-dumps/trace-%H-%M.pcap
+    echo "Filter is $FILTER"
+    tcpdump $FILTER -i $NETIF -G $ROTATE_SEC -w /bridgenw-dumps/trace-%H-%M.pcap
 }
 
 if [ "$#" == "0" ]; then
     manager
 else
-    worker $1
+    NETIF=$1
+    ROTATE_SEC=$2
+    FILTER=$3
+    worker
 fi
