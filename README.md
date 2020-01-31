@@ -2,11 +2,26 @@
 
 A utility to capture all Traffic on a Docker Bridge Network to rotating .pcap files.
 
-Please note that docker-bridgenw-dump will not work with overlay networks,
-only with bridge networks.
+**When to use docker-bridgenw-dump**
 
 It's primary usecase is to provide network dumps for development or testing.
 It's not designed and tested to be a production tool.
+
+Please note that docker-bridgenw-dump will not work with overlay networks,
+only with bridge networks.
+
+**Why use docker-bridgenw-dump instead of manually starting tcpdump on the host?**
+
+As a docker bridge network creates a network interface on the host, it is easy 
+to run tcpdump with the correct network interface. By using docker-bridgenw-dump, 
+you gain the follwing advantages:
+- Works with Docker for Windows: When using Docker for Windows, you have no 
+access to the virtual machine running the Docker engine.
+- Automatically attach to the correct network: You don't have to lookup the correct 
+network interface manually. This is specially usefull in a docker-compose based 
+application, where each service is attached to a network by default.
+
+**Links**
 
 [docker-bridgenw-dump on github](https://github.com/gprossliner/docker-bridgenw-dump)
 
@@ -14,14 +29,14 @@ It's not designed and tested to be a production tool.
 
 ## Contributing
 
-Contribution in form of Issues, Comments and Pull-Requests are welcome.
-Please feel free to create an Issue if you have questions.
+Contribution in form of Issues, Comments and Pull-Requests are very welcome.
+Please feel free to create an Issue if you have any questions.
 
 ## Usage
 
 Requirements for a container running the `docker-bridgenw-dump` image:
-- mount the docker socket, because we need to get information from docker
-- mount a volume to the `/bridgenw-dumps` ontainer path
+- mount the Docker socket, because we need to get information from Docker
+- mount a volume to the `/bridgenw-dumps` container path
 - attach the container to the network you want to dump
 
 ## Start manually
@@ -32,7 +47,7 @@ You can start it by `docker run`, like:
 docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/dumpfiles:/bridgenw-dumps \
-    --net dockeroverlaydump_testnet \
+    --net testnetwork \
     gprossliner/docker-bridgenw-dump
 ```
 
@@ -43,15 +58,21 @@ You can include docker-bridgenw-dump as a service in docker-compose, like:
 ```yaml
 services:
 
+  # our services ....
+
   docker-bridgenw-dump:
     image: gprossliner/docker-bridgenw-dump
     volumes:
+      # /tmp/capfiles is the host directory where the .pcap files are written to
+      - /tmp/capfiles:/bridgenw-dumps
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/files:/bridgenw-dumps
     networks:
       # docker-bridgenw-dump dumps traffik connected to this network
       # this may also be the default network
       - testnet
+
+  networks:
+    testnet:
 ```
 
 ## Example
@@ -62,7 +83,7 @@ in docker-compose.
 ## How it works
 
 When you start a docker-bridgenw-dump container, it starts in 'Manager' mode.
-Because it has the docker socket mounted from the Host, it use the hosts docker engine.
+Because it has the Docker socket mounted from the Host, it use the hosts Docker engine.
 
 By self-inspection within the container, we get the following information:
 
@@ -98,8 +119,8 @@ files are deleted from the output directory! If you wanna keep old traces,
 copy them elsewhere.
 
 To avoid leftover containers, the Manager:
-- Handles SIGINT and SIGTERM to stop a running Worker
-- Monitors the status of the Worker to stop itself, it the Worker as stopped unexpectedly
+- handles SIGINT and SIGTERM to stop a running Worker
+- monitors the status of the Worker to stop itself, if the Worker has stopped unexpectedly
 
 ## Build
 
@@ -107,15 +128,31 @@ To build the image manually, use the `./build.sh` script. It passes the `IMAGENA
 build-arg, which will be stored in an Environment Variable. This is used to start
 the worker.
 
-**NOTE:** By default, the "latest" tag will be used. You may specify another tag,
-but this has not been tested yet.
-
 ## Tests
 
 Currently there are neither Unit nor Integration Tests. The docker-bridgenw-dump
-tool has been tested manually on Ubuntu 18.04.3 LTS, and Docker version 18.09.7, build 2d0083d.
+tool has been tested manually on:
 
-Tested on Windows Version	10.0.18363 Build 18363, and Docker for Windows version 19.03.5, build 633a0ea.
+* Ubuntu 18.04.3 LTS, and Docker version 18.09.7, build 2d0083d.
+* Windows Version 10.0.18363 Build 18363, and Docker for Windows version 19.03.5, build 633a0ea.
+
+If you test the tool on in a different environment, please let me know, so I may 
+add this to the list.
+
+## Release Notes
+
+The dockerhub images are automatically build an pushed by dockerhub automated build, 
+using the following rules:
+- If anything is pushed to 'master', an image is build for the 'latest' tag
+- If a release is created, it creates a tag using the vX.Y pattern, and an image 
+with the corresponding tag is build and pushed.
+
+As the name of the image is included in the image itself as an environment variable,
+the digests of the 'lastest' and the latest 'vX.Y...' tag will be different, 
+allthough they are build from the same commit.
+
+If you use the 'latest' tag, the worker container will also use 'latest'.
+If you use a version tag, the container will always use the same version.
 
 ## Return Codes
 
